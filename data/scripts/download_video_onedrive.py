@@ -1,6 +1,7 @@
 import argparse
 import requests
 import os
+from tqdm import tqdm
 
 
 def main(args):
@@ -12,8 +13,10 @@ def main(args):
         response = requests.get(args.url, stream=True)
         response.raise_for_status()  # Raise an exception for unsuccessful requests
 
+        total_file_size = int(response.headers['Content-Length'])
+
         with open(os.path.join(video_dir, "collation.tar.gz"), "wb") as f:
-            for chunk in response.iter_content(1024):
+            for chunk in tqdm(response.iter_content(1024), unit="B", unit_scale=True, unit_divisor=1024, total=total_file_size):
                 f.write(chunk)
 
         print(f"File downloaded successfully to: {video_dir}")
