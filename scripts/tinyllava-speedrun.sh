@@ -7,7 +7,7 @@ conda activate tinyllava
 pip install --upgrade pip  # enable PEP 660 support
 pip install -e .
 pip install -e ".[train]"
-pip install flash-attn --no-build-isolation
+pip install flash-attn==1.0.9 --no-build-isolation  # downgrade to flash attention v1 for older gpu support
 mkdir data
 current_dir=$(pwd)
 sed -i 's|IMAGE_PATH=".*"|IMAGE_PATH="'"${current_dir}/data"'"|' scripts/tiny_llava/finetune/finetune.sh
