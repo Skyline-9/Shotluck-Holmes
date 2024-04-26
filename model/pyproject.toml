@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tinyllava"
+name = "Shotluck-Holmes"
 version = "1.0.0"
-description = "A Framework of Small-scale Large Multimodal Models."
+description = "Large Language Vision Models for Shot-Level Video Understanding."
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
@@ -26,8 +26,8 @@ dependencies = [
 train = ["deepspeed==0.9.5", "ninja", "wandb"]
 
 [project.urls]
-"Homepage" = "https://github.com/DLCV-BUAA/TinyLLaVABench"
-"Bug Tracker" = "https://github.com/DLCV-BUAA/TinyLLaVABench/issues"
+"Homepage" = "https://github.com/Skyline-9/Shotluck-Holmes"
+"Bug Tracker" = "https://github.com/Skyline-9/Shotluck-Holmes/issues"
 
 [tool.setuptools.packages.find]
 exclude = ["assets*", "benchmark*", "docs", "dist*", "playground*", "scripts*", "tests*"]
