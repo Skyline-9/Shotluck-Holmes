@@ -1,0 +1,11 @@
+byted-dataloader==0.3.6
+en-core-web-sm==3.0.0
+ipython==8.14.0
+nlg-eval==2.3
+salesforce-lavis==1.0.0.dev1
+
+change antlr4-python3-runtime==4.8 to antlr4-python3-runtime==4.9 because hydra-core 1.3.2 depends on antlr4-python3-runtime==4.9.*
+
+Unavailable data: 20023
+['LEwayCpIk20' 'R2-Usq--J3U' 'mIRf-AWwUEs' ... 'l3V3PG4f9uM' 'jD9od-_9nNg'
+ '03FYU8RYMU0']
