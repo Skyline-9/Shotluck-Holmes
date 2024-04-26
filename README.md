@@ -61,7 +61,20 @@ pip install flash-attn==1.0.9 --no-build-isolation  # downgrade to flash attenti
 
 ## Finetuning
 
-Navigate to `model/scripts/tiny_llava/finetune/finetune.sh` and update the parameters for your image and annotation paths. For 1.5B LlaVa, change 3.1 to 1.5 and version to v1. Then, run `finetune.sh`
+Finetuning scripts are in `model/scripts/tiny_llava/finetune`. First, edit the data and image path in the scripts
+
+```
+DATA_PATH="YOUR_FULL_PATH_TO_ANNOTATIONS/test.json"
+IMAGE_PATH="YOUR_FULL_PATH_TO_VIDEOS"
+OUTPUT_DIR="OUTPUT_FOLDER_NAME"
+```
+
+Run the finetuning script corresponding to which model you want to use. For example, for the 1.5B model, run
+```sh
+sh model/scripts/tiny_llava/finetune/finetune_1b5.sh
+```
+
+Similarly, the 3.1B model is in `finetune_3b1.sh`.
 
 <!-- Model -->
 ## Model
