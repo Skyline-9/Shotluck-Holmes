@@ -54,6 +54,8 @@ def train():
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     local_rank = training_args.local_rank
+
+    print(data_args)
     # 2. prepare model
     # 2.1 kbit & compute_dtype  ===>  model
     # 2.2 vision_tower.property  and load
@@ -67,7 +69,7 @@ def train():
             model_args.model_name_or_path,
             cache_dir=training_args.cache_dir,
             **bnb_model_from_pretrained_args,
-            attn_implementation="flash_attention_2",
+            # attn_implementation="flash_attention_2",
             torch_dtype=compute_dtype
         )
     else:
