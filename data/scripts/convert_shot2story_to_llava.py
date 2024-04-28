@@ -41,7 +41,7 @@ def main():
         data = json.load(file)
 
     # Replace keys recursively
-    replace_keys(data, 'conversations', 'conversations')
+    replace_keys(data, 'whole_caption', 'conversations')
 
     # Write the updated data back to the file
     with open(json_file_path, 'w') as file:
