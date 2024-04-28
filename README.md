@@ -30,6 +30,7 @@
       <a href="#model">Model</a>
     </li>
     <li><a href="#-requirements-and-installation">🔧 Requirements and Installation</a></li>
+    <li><a href="#data-pre-processing">Data Pre-processing</a></li>
     <li><a href="#finetuning">Finetuning</a></li>
   </ol>
 </details>
@@ -68,6 +69,8 @@ If running on Shot2Story dataset, follow https://github.com/bytedance/Shot2Story
 ```sh
 python data/scripts/convert_shot2story_to_llava.py --p YOUR_INPUT_PATH --o YOUR_OUTPUT_FILE
 ```
+
+_Note_: `ffmpeg` is required for process_videos.py. If this is not installed, download ffmpeg accordingly for your OS or install it locally using the `download-ffmpeg.sh` script.
 
 ## Finetuning
 
