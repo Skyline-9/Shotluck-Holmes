@@ -61,6 +61,14 @@ pip install flash-attn==2.5.8 --no-build-isolation  # upgrade to this version of
 # pip install flash-attn==1.0.9 --no-build-isolation  # downgrade to flash attention v1 for older GPUs
 ```
 
+## Data Pre-processing
+
+If running on Shot2Story dataset, follow https://github.com/bytedance/Shot2Story/issues/5 to download the data and then run `process_videos.py` in data/scripts. Then, convert the data by running the following from the root directory
+
+```sh
+python data/scripts/convert_shot2story_to_llava.py --p YOUR_INPUT_PATH --o YOUR_OUTPUT_FILE
+```
+
 ## Finetuning
 
 Finetuning scripts are in `model/scripts/tiny_llava/finetune`. First, edit the data and image path in the scripts
