@@ -1,16 +1,26 @@
 #!/bin/bash
+#SBATCH --job-name=finetune_1b5.sh
+#SBATCH --output=%x.%j.out
+#SBATCH --error=%x.%j.err
+#SBATCH -t 0-04:00:00
+#SBATCH --gres=gpu:4
+#SBATCH --mem=64GB
+#SBATCH --ntasks-per-node=15
+
+# print allocation
+nvidia-smi
 
 # Assign the arguments to variables
 DATA_PATH="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/my_annotations/20k_val.json"
 IMAGE_PATH="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/videos"
-OUTPUT_DIR="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/OUTPUT"
+OUTPUT_DIR="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/OUTPUT-one-epoch"
 
 deepspeed tinyllava/train/train.py \
     --deepspeed ./scripts/tiny_llava/zero3.json \
     --model_name_or_path bczhou/TinyLLaVA-1.5B \
     --version v1 \
     --data_path $DATA_PATH \
-    --image_folder $IMAGE_PATH\
+    --image_folder $IMAGE_PATH \
     --vision_tower bczhou/TinyLLaVA-1.5B-SigLIP \
     --mm_projector_type mlp2x_gelu \
     --mm_vision_select_layer -2 \

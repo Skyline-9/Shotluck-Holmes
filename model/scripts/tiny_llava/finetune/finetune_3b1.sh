@@ -1,4 +1,14 @@
 #!/bin/bash
+#SBATCH --job-name=finetune_1b5.sh
+#SBATCH --output=%x.%j.out
+#SBATCH --error=%x.%j.err
+#SBATCH -t 0-08:00:00
+#SBATCH --gres=gpu:V100:2
+#SBATCH --mem=64GB
+#SBATCH --ntasks-per-node=15
+
+# print allocation
+nvidia-smi
 
 # Assign the arguments to variables
 DATA_PATH="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/my_annotations/20k_val.json"

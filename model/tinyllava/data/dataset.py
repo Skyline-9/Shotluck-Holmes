@@ -105,9 +105,6 @@ class LazySupervisedDataset(Dataset):
             video = self.load_video(os.path.join(video_folder, video_file), height=384, width=384)
             video = video.permute(1, 0, 2, 3)
 
-            # print(type(tmp))
-            # print(tmp.size())
-
             sources = preprocess_multimodal(
                 copy.deepcopy([e["conversations"] for e in sources]),
                 self.data_args)
@@ -136,7 +133,7 @@ class LazySupervisedDataset(Dataset):
         return data_dict
 
     # n_frms=MAX_INT
-    def load_video(self, video_path, n_frms=100, height=-1, width=-1, sampling="uniform", clips=None):
+    def load_video(self, video_path, n_frms=8, height=-1, width=-1, sampling="uniform", clips=None):
         # check video_path
         if type(video_path) is not str:
             file_obj = io.BytesIO(video_path)
@@ -177,6 +174,7 @@ class LazySupervisedDataset(Dataset):
                 else:
                     raise NotImplementedError
                 frms.append(vr.get_batch(indices).permute(3,0,1,2).float())
+                # frms.append(vr.get_batch(indices).permute(0, 3, 1, 2).float())
         else:
             vlen = len(vr)
             #print('video len', vlen)
@@ -205,15 +203,19 @@ class LazySupervisedDataset(Dataset):
             try:
                 frms = vr.get_batch(indices)
                 if isinstance(frms, torch.Tensor):
-                    frms = frms.permute(3,0,1,2).float() 
+                    frms = frms.permute(3,0,1,2).float()
+                    # frms = frms.permute(0, 3, 1, 2).float()
                 elif isinstance(frms, NDArray):
-                    frms = torch.from_numpy(frms.asnumpy()).permute(3,0,1,2).float() 
+                    frms = torch.from_numpy(frms.asnumpy()).permute(3,0,1,2).float()
+                    # frms = torch.from_numpy(frms.asnumpy()).permute(0, 3, 1, 2).float()
             except Exception as e:
                 print(indices, len(vr), n_frms)
                 print(video_path)
                 indices = [int(i) if int(i) < len(vr) else rnd.sample(range(vlen),1)[0] for i in indices]
                 print(indices)
                 print(e)
+
+            # shape is [frames, channels, height width]
             assert len(frms[0])==n_frms, f"{frms.shape}, {len(frms)}, {indices}, {vlen}, {n_frms}"
             # frms = torch.from_numpy(vr.get_batch(indices).asnumpy()).permute(3, 0, 1, 2).float()  # (C, T, H, W)
 
@@ -226,11 +228,6 @@ class DataCollatorForSupervisedDataset(object):
     tokenizer: transformers.PreTrainedTokenizer
 
     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
-        # for instance in instances:
-        #     print(instance)
-        #     print(type(instance))
-        #     print("\n\n")
-        #     return
         input_ids, labels = tuple([instance[key] for instance in instances]
                                   for key in ("input_ids", "labels"))
 
@@ -238,7 +235,7 @@ class DataCollatorForSupervisedDataset(object):
         # print(f"label type: {type(labels)}")
         # print(input_ids)
         # print(labels)
-        # return
+
         if self.tokenizer.pad_token_id == self.tokenizer.eos_token_id:
             for input_id in input_ids:
                 input_id[input_id == self.tokenizer.eos_token_id] = -300
