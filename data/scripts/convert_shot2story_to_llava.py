@@ -2,28 +2,51 @@ import json
 import argparse
 
 
-def convert(data, output_path):
-    keys = data.keys()
+# Function to recursively replace keys
+def replace_keys(obj, old_key, new_key):
+    if isinstance(obj, dict):
+        for key in list(obj.keys()):
+            if key == old_key:
+                obj[new_key] = obj.pop(old_key)
+                caption = obj[new_key]
 
-    ## TODO: Map old data keys to new data keys
-    write_file(data, output_path)
-
-
-def write_file(data, output_path):
-    with open(output_path, "w") as f:
-        json.dump(data, f)
+                val = [
+                    {
+                        "from": "human",
+                        "value": "<image>\nCaption this video"
+                    }, {
+                        "from": "gpt",
+                        "value": caption
+                    }
+                ]
+                obj[new_key] = val
+            else:
+                replace_keys(obj[key], old_key, new_key)
+    elif isinstance(obj, list):
+        for item in obj:
+            replace_keys(item, old_key, new_key)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_path", help="Path to the json to process")
-    parser.add_argument("output_path", help="Path to the output json")
-    args = parser.parse_args()
+    parser.add_argument('--p', type=str,
+                        default="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/my_annotations/20k_val.json",
+                        help='Path to the input JSON file')
+    parser.add_argument('--o', type=str,
+                        default="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/my_annotations/20k_val.json",
+                        help='Path to the output JSON file')
 
-    with open(args.input_path, "r") as f:
-        data = json.load(f)
-        convert(data, args.output_path)
+    # Load the JSON data from the file
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+
+    # Replace keys recursively
+    replace_keys(data, 'conversations', 'conversations')
+
+    # Write the updated data back to the file
+    with open(json_file_path, 'w') as file:
+        json.dump(data, file, indent=4)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

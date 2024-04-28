@@ -1,5 +1,6 @@
 # Copyright 2023 ByteDance and/or its affiliates.
 #
+# Modified Copyright 2024 Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,15 +17,13 @@
 import os
 import ast
 import decord
-import asynchat
 import argparse
-import time
 from tqdm import tqdm
 
 import pandas as pd
 import pickle as pkl
 import multiprocessing as mp
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 lock = mp.Lock()
 
@@ -41,23 +40,41 @@ def parse_large_timestamps(time_str):
     return td
 
 
-def split_video(input):
-    row, shots = input
+def split_video(video_info):
+    """
+    Split a video into clips based on shot boundaries.
+
+    Args:
+        video_info (tuple): A tuple containing information about the video.
+            - row (pandas.Series): A pandas Series containing video annotations.
+            - shots (list): A list of tuples representing shot boundaries (start, end) in the video.
+
+    Returns:
+        str: The clip ID of the processed video.
+
+    Notes:
+        This function uses ffmpeg to split the input video into clips based on shot boundaries.
+        Each clip is saved as a separate video file.
+    """
+    row, shots = video_info
+
+    # Change ffmpeg path if not installed locally
     cmd_template = "ffmpeg-6.1-amd64-static/ffmpeg -n -i {} -ss {} -t {} -c:v libx264 -c:a aac {}"  # -c:v libx264 -c:a aac
 
     video_name = row['video_name']
     clip_id = row['clip_id']
 
-    start = ast.literal_eval(row['duration'])[0]
-    end = ast.literal_eval(row['duration'])[1]
-    duration = (parse_large_timestamps(end) - parse_large_timestamps(start)).total_seconds()
+    # Uncomment the following lines if the video is downloaded from ytdl instead of the processed tar file
+    # start = ast.literal_eval(row['duration'])[0]
+    # end = ast.literal_eval(row['duration'])[1]
+    # duration = (parse_large_timestamps(end) - parse_large_timestamps(start)).total_seconds()
     # cmd = cmd_template.format(f"/home/hice1/apeng39/scratch/nlp/Shotluck-Holmes/data/videos/{video_name}", start, duration, f"/home/hice1/apeng39/scratch/nlp/Shotluck-Holmes/data/videos_extracted/{clip_id}.mp4")
-    
+
     copy_cmd = f"cp data/videos/{video_name} data/videos_extracted/{clip_id}.mp4"
     os.system(copy_cmd)
     # write_to_file(vids_file, cname)
 
-    try: 
+    try:
         vreader = decord.VideoReader(f"data/videos_extracted/{clip_id}.mp4")
         fps = vreader.get_avg_fps()
         for shot in shots:
@@ -68,19 +85,18 @@ def split_video(input):
             print(f"{clip_id}, start {start_time} end {end_time}")
 
             cmd = cmd_template.format(f"data/videos_extracted/{clip_id}.mp4", start_time, duration,
-                                    f"data/videos_extracted/{clip_id}_{shot[0]}_{shot[1]}.mp4")
+                                      f"data/videos_extracted/{clip_id}_{shot[0]}_{shot[1]}.mp4")
             os.system(cmd)
     except Exception as e:
         print(f"Exception FOUND! {e}")
-        print('\033[93m' +f"Corrupted video {clip_id}, DELETING\033[0m")
+        print('\033[93m' + f"Corrupted video {clip_id}, DELETING\033[0m")
         if os.path.exists(f"data/videos_extracted/{clip_id}.mp4"):
             os.remove(f"data/videos_extracted/{clip_id}.mp4")
-    
+
     return clip_id
 
 
 if __name__ == '__main__':
-    ffmpeg_path = '/home/hice1/apeng39/scratch/Shotluck-Holmes/ffmpeg-6.1-amd64-static'
     parser = argparse.ArgumentParser()
     parser.add_argument('--processes', type=int, default=16)
     args = parser.parse_args()
@@ -102,9 +118,9 @@ if __name__ == '__main__':
     os.makedirs('data/videos_extracted', exist_ok=True)
 
     try:
-        exitsting_vids = [l.strip() for l in open(vids_file, 'r').readlines()]
+        existing_videos = [l.strip() for l in open(vids_file, 'r').readlines()]
     except:
-        exitsting_vids = []
+        existing_videos = []
 
     inputs = []
     for index, row in data.iterrows():
