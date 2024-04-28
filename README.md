@@ -30,6 +30,7 @@
       <a href="#model">Model</a>
     </li>
     <li><a href="#-requirements-and-installation">🔧 Requirements and Installation</a></li>
+    <li><a href="#finetuning">Finetuning</a></li>
   </ol>
 </details>
 
@@ -56,7 +57,8 @@ conda activate shotluck
 pip install --upgrade pip
 pip install -e .
 pip install -e ".[train]"
-pip install flash-attn==1.0.9 --no-build-isolation  # downgrade to flash attention v1 for older GPUs
+pip install flash-attn==2.5.8 --no-build-isolation  # upgrade to this version of flash-attn for H100
+# pip install flash-attn==1.0.9 --no-build-isolation  # downgrade to flash attention v1 for older GPUs
 ```
 
 ## Finetuning
