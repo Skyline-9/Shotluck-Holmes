@@ -7,13 +7,13 @@
 #SBATCH --mem=64GB
 #SBATCH --ntasks-per-node=15
 
-# print allocation
-nvidia-smi
+# Set absolute path of repository
+PROJECT_ROOT="/home/hice1/apeng39/scratch/Shotluck-Holmes"
 
 # Assign the arguments to variables
-DATA_PATH="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/my_annotations/20k_val.json"
-IMAGE_PATH="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/videos"
-OUTPUT_DIR="/home/hice1/apeng39/scratch/Shotluck-Holmes/data/OUTPUT"
+DATA_PATH="$PROJECT_ROOT/data/my_annotations/20k_train.json"
+IMAGE_PATH="$PROJECT_ROOT/data/videos"
+OUTPUT_DIR="$PROJECT_ROOT/data/output_3b1"
 
 deepspeed tinyllava/train/train.py \
     --deepspeed ./scripts/tiny_llava/zero3.json \

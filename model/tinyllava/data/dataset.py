@@ -20,8 +20,6 @@ from decord.ndarray import NDArray
 import numpy as np
 import os
 
-print(f"HERERE:RJEKL:RE {os.getcwd()}")
-
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
