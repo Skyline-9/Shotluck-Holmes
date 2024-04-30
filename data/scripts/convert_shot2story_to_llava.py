@@ -1,6 +1,9 @@
 import json
 import argparse
 
+from decord import VideoReader
+import os
+
 
 # Function to recursively replace keys
 def replace_keys(obj, old_key, new_key):
@@ -52,6 +55,14 @@ def separate_shots(obj):
         for i, shot in enumerate(video_names):
             shot_obj = {}  # Create a new entry for each shot
 
+            try:
+                long_shot = os.path.join("data/videos_extracted", shot)
+                vr = VideoReader(uri=long_shot)
+                print("not cooked")
+            except Exception as e:
+                print("cooked")
+                continue
+
             # Populate from large video
             shot_obj["video"] = shot
             shot_obj["conversations"] = [
@@ -87,13 +98,13 @@ def main():
     parser.add_argument(
         "-i", "--input",
         type=str,
-        default="data/annotations/20k_test.json",
+        default="data/annotations/20k_train.json",
         help="Path to the input JSON file",
     )
     parser.add_argument(
         "-o", "--output",
         type=str,
-        default="data/converted_annotations/20k_test.json",
+        default="data/my_annotations/20k_train.json",
         help="Path to the output JSON file",
     )
 
