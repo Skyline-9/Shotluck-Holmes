@@ -37,10 +37,10 @@ def main():
     split_lists = [data[i * chunk_size: (i + 1) * chunk_size] for i in range(args.n)]
 
     # Write data to n different files
-    for i in range(args.n):
+    for i, val in enumerate(split_lists):
         file_name = f"{args.output}_{i}.json"
         with open(file_name, "w") as file:
-            json.dump(data, file, indent=4)
+            json.dump(val, file, indent=4)
 
 
 if __name__ == "__main__":
