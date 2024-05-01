@@ -57,6 +57,14 @@ class LazySupervisedDataset(Dataset):
             length_list.append(cur_len)
         return length_list
 
+    def get_ground_truth(self, i):
+        sources = self.list_data_dict[i]['conversations'][1]['value']
+        return sources
+    
+    def get_video_title(self, i):
+        sources = self.list_data_dict[i]['video']
+        return sources
+
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
         sources = self.list_data_dict[i]
         if isinstance(i, int):
