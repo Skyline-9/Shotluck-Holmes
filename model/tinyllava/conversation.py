@@ -464,6 +464,7 @@ conv_qwen2 = Conversation(
     sep="<im_end>"
 )
 
+# default_conversation = conv_phi_v0 # conv_vicuna_v1
 default_conversation = conv_vicuna_v1
 conv_templates = {
     "default": conv_vicuna_v0,

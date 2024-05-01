@@ -38,7 +38,9 @@ import_modules(models_dir, "tinyllava.data.preprocess")
 
 
 def PreprocessSelect(version):
+    # print(version)
     result = PREPROCESS_REGISTRY.get(version, None)
+    # print(f"RESULT {result}")
     if result is None:
         for name in PREPROCESS_REGISTRY.keys():
             if version in name:

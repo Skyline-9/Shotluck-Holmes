@@ -71,8 +71,6 @@ class LazySupervisedDataset(Dataset):
             sources = [sources]
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
         
-        # print(sources)
-
         if 'image' in sources[0]:
             image_file = self.list_data_dict[i]['image']
             image_folder = self.data_args.image_folder
@@ -105,9 +103,6 @@ class LazySupervisedDataset(Dataset):
             video_file = self.list_data_dict[i]['video']
             video_folder = self.data_args.image_folder
             
-            # image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
-            # print(video_path)
-
             video = self.load_video(os.path.join(video_folder, video_file), height=384, width=384)
             video = video.permute(1, 0, 2, 3)
 
@@ -117,7 +112,6 @@ class LazySupervisedDataset(Dataset):
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
 
-        # print(preprocess)
         data_dict = preprocess(
             sources,
             self.tokenizer,
@@ -139,7 +133,7 @@ class LazySupervisedDataset(Dataset):
         return data_dict
 
     # n_frms=MAX_INT
-    def load_video(self, video_path, n_frms=8, height=-1, width=-1, sampling="uniform", clips=None):
+    def load_video(self, video_path, n_frms=120, height=-1, width=-1, sampling="uniform", clips=None):
         # check video_path
         if type(video_path) is not str:
             file_obj = io.BytesIO(video_path)
@@ -183,9 +177,7 @@ class LazySupervisedDataset(Dataset):
                 # frms.append(vr.get_batch(indices).permute(0, 3, 1, 2).float())
         else:
             vlen = len(vr)
-            #print('video len', vlen)
             start, end = 0, vlen
-            #n_frms = min(n_frms, vlen)
             if n_frms > vlen:
                 indices = np.arange(start, end, vlen / n_frms).astype(int)
             elif sampling == "uniform":
@@ -202,8 +194,6 @@ class LazySupervisedDataset(Dataset):
                 raise NotImplementedError
 
             # get_batch -> T, H, W, C
-            #print(frms)
-            #print(frms.shape)
             indices = [int(i) if int(i) < len(vr) else vlen-1 for i in indices]
             indices = sorted(indices)[:n_frms]
             try:
@@ -236,11 +226,6 @@ class DataCollatorForSupervisedDataset(object):
     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
         input_ids, labels = tuple([instance[key] for instance in instances]
                                   for key in ("input_ids", "labels"))
-
-        # print(f"input_ids type {type(input_ids)}")
-        # print(f"label type: {type(labels)}")
-        # print(input_ids)
-        # print(labels)
 
         if self.tokenizer.pad_token_id == self.tokenizer.eos_token_id:
             for input_id in input_ids:

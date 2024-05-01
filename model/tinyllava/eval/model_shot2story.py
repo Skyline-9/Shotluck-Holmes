@@ -1,5 +1,9 @@
 import argparse
 import torch
+import evaluate
+from tqdm import tqdm
+
+from torch.utils.data import DataLoader
 
 from tinyllava.constants import (
     IMAGE_TOKEN_INDEX,
@@ -32,21 +36,27 @@ from tinyllava.arguments import *
 
 import os
 
+# DataLoader
+def create_data_loader(dataset, model_config, batch_size=1, num_workers=15):
+    assert batch_size == 1, "batch_size must be 1"
+    data_loader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False)#, collate_fn=collate_fn)
+    return data_loader
+
 def eval_model(args):
     # Model
     disable_torch_init()
-
     model_path = args.model_path
 
     if args.model_path == "NULL":
+        print("HERE")
         model_path = "bczhou/TinyLLaVA-3.1B"
-        
 
     model_name = get_model_name_from_path(model_path)
-    print(model_name)
+
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path, args.model_base, model_name
     )
+
 
     qs = ""
     image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
@@ -61,7 +71,6 @@ def eval_model(args):
         else:
             qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
 
-
     if 'phi' in model_name.lower() or '3.1b' in model_name.lower():
         conv_mode = "phi"
     if "llama-2" in model_name.lower():
@@ -72,7 +81,7 @@ def eval_model(args):
         conv_mode = "mpt"
     else:
         conv_mode = "llava_v0"
-    
+
     if args.conv_mode is not None and conv_mode != args.conv_mode:
         print(
             "[WARNING] the auto inferred conversation mode is {}, while `--conv-mode` is {}, using {}".format(
@@ -82,46 +91,78 @@ def eval_model(args):
     else:
         args.conv_mode = conv_mode
     
-
     conv = conv_templates[args.conv_mode].copy()
     conv.append_message(conv.roles[0], qs)
     conv.append_message(conv.roles[1], None)
     prompt = conv.get_prompt()
 
+    train_dataset = make_supervised_data_module(tokenizer, args)['train_dataset']
 
-    video_object =  make_supervised_data_module(tokenizer, args)['train_dataset']
+    gts = []
+    preds = []
 
-    for i in range(0, 20000, 50):
-        index = i
-        video_tensor = video_object[index]
+    data_loader = create_data_loader(train_dataset, model.config)
 
-        input_ids = video_tensor['input_ids'].unsqueeze(0).cuda()
+    bleu = evaluate.load("bleu")
+    meteor = evaluate.load("meteor")
+    rouge = evaluate.load("rouge")
 
+    for i, x in tqdm(enumerate(data_loader), total=len(data_loader)):
+        input_ids, labels, video = x.values()
+        input_ids = input_ids.cuda()
+        labels = labels.cuda()
+        video = video.cuda()
 
-        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-        keywords = [stop_str]
+        attention_mask = (input_ids != tokenizer.pad_token_id).long()
 
         with torch.inference_mode():
             output_ids = model.generate(
                         input_ids,
-                        images=video_tensor['image'].unsqueeze(0).half().cuda(),
+                        attention_mask=attention_mask,
+                        pad_token_id=tokenizer.eos_token_id,
+                        images=video.half().cuda(),
                         do_sample=False,
                         max_new_tokens=128,
                         # no_repeat_ngram_size=3,
-                        use_cache=True)
+                        use_cache=False)
 
-            outputs = tokenizer.batch_decode(
-                output_ids, skip_special_tokens=True
-            )[0]
+            outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
             outputs = outputs.strip()
-            if outputs.endswith(stop_str):
-                outputs = outputs[: -len(stop_str)]
-            outputs = outputs.strip()
-        
-            file_path = os.path.join(args.output_dir, "outputs.txt")
 
-            ground_truth = "Ground Truth: " + str(video_object.get_ground_truth(index))
-            our_model = "Shotluck Holmes: " + str(outputs)
+
+            gt = str(train_dataset.get_ground_truth(i))
+            # ground_truth = "Ground Truth: " + str(train_dataset.get_ground_truth(i))
+            # our_model = "Shotluck Holmes: " + str(outputs)
+
+            if len(outputs) == 0:
+                continue
+
+            print(f"VIDEO TITLE: {train_dataset.get_video_title(i)}")
+            print(f"PREDICTION: {outputs}\n")
+            print(f"GT: {gt}\n\n")
+            preds.append(outputs)
+            gts.append([gt])
+
+            bleu_results = bleu.compute(predictions=preds, references=gts)
+            print(bleu_results)
+
+            meteor_results = meteor.compute(predictions=preds, references=gts)
+            print(meteor_results)
+
+            rouge_results = rouge.compute(predictions=preds, references=gts)
+            print(rouge_results)
+    
+    bleu_results = bleu.compute(predictions=preds, references=gts)
+    print(bleu_results)
+
+    meteor_results = meteor.compute(predictions=preds, references=gts)
+    print(meteor_results)
+
+    rouge_results = rouge.compute(predictions=preds, references=gts)
+    print(rouge_results)
+
+    print(f"{len(predictions)}/{len(data_loader)}")
+
     
 
 

@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=finetune_1b5.sh
+#SBATCH --job-name=finetune_3b1.sh
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err
-#SBATCH -t 0-08:00:00
-#SBATCH --gres=gpu:V100:2
+#SBATCH -t 0-04:00:00
+#SBATCH --gres=gpu:H100:4
 #SBATCH --mem=64GB
 #SBATCH --ntasks-per-node=15
 
@@ -11,8 +11,8 @@
 PROJECT_ROOT="/home/hice1/apeng39/scratch/Shotluck-Holmes"
 
 # Assign the arguments to variables
-DATA_PATH="$PROJECT_ROOT/data/my_annotations/20k_train.json"
-IMAGE_PATH="$PROJECT_ROOT/data/videos"
+DATA_PATH="$PROJECT_ROOT/data/converted_annotations/20k_train.json"
+IMAGE_PATH="$PROJECT_ROOT/data/videos_extracted"
 OUTPUT_DIR="$PROJECT_ROOT/data/output_3b1"
 
 deepspeed tinyllava/train/train.py \
