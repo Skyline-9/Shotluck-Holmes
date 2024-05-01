@@ -5,26 +5,6 @@ from decord import VideoReader
 import os
 
 
-# Function to recursively replace keys
-def replace_keys(obj, old_key, new_key):
-    if isinstance(obj, dict):
-        for key in list(obj.keys()):
-            if key == old_key:
-                obj[new_key] = obj.pop(old_key)
-                caption = obj[new_key]
-
-                val = [
-                    {"from": "human", "value": "<image>\nCaption this video"},
-                    {"from": "gpt", "value": caption},
-                ]
-                obj[new_key] = val
-            else:
-                replace_keys(obj[key], old_key, new_key)
-    elif isinstance(obj, list):
-        for item in obj:
-            replace_keys(item, old_key, new_key)
-
-
 def separate_shots(obj):
     """
     Separate shots from a given input object and organize them into a list of dictionaries representing each shot and the total video.
@@ -58,9 +38,7 @@ def separate_shots(obj):
             try:
                 long_shot = os.path.join("data/videos_extracted", shot)
                 vr = VideoReader(uri=long_shot)
-                print("not cooked")
             except Exception as e:
-                print("cooked")
                 continue
 
             # Populate from large video
