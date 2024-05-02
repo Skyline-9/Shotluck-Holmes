@@ -30,17 +30,31 @@
       <a href="#model">Model</a>
     </li>
     <li><a href="#-requirements-and-installation">🔧 Requirements and Installation</a></li>
-    <li><a href="#data-pre-processing">Data Pre-processing</a></li>
+    <li>
+        <a href="#data-pre-processing">Data Pre-processing</a>
+        <ul>
+            <li><a href="#downloading">Downloading</a></li>
+            <li><a href="#pre-processing">Pre-processing</a></li>
+        </ul>
+    </li>
     <li><a href="#finetuning">Finetuning</a></li>
   </ol>
 </details>
 
 <!-- INTRODUCTION -->
+
 ## Introduction
 
-Something about task motivation
+Video is a rapidly growing format rich in information, yet it remains a challenging task for computers to understand. A
+video often consists of a storyline comprised of multiple short shots, and comprehension of the video requires not only
+understanding the shot-by-shot visual-audio information but also associating the ideas between each shot for a larger
+big-picture idea. Despite significant progress, current works neglect videos' more granular shot-by-shot semantic
+information. In this project, we propose an efficient large language vision model (LLVM) to boost video summarization
+and captioning. Specifically, we reproduce near-SOTA results on the Shot2Story video captioning task with a much smaller
+model.
 
 <!-- REQUIREMENTS AND INSTALLATION -->
+
 ## 🔧 Requirements and Installation
 
 1. Clone this repository and navigate to the folder
@@ -55,41 +69,70 @@ cd Shotluck-Holmes
 ```sh
 conda create -n shotluck python=3.10 -y
 conda activate shotluck
+cd model
 pip install --upgrade pip
 pip install -e .
 pip install -e ".[train]"
+cd ..
 pip install flash-attn==2.5.8 --no-build-isolation  # upgrade to this version of flash-attn for H100
 # pip install flash-attn==1.0.9 --no-build-isolation  # downgrade to flash attention v1 for older GPUs
 ```
 
-## Data Pre-processing
+Alternatively, you can run `setup-speedrun.sh` from the root directory to execute all the commands above
 
-If running on Shot2Story dataset, follow https://github.com/bytedance/Shot2Story/issues/5 to download the data and then run `process_videos.py` in data/scripts. Then, convert the data by running the following from the root directory
-
-```sh
-python data/scripts/convert_shot2story_to_llava.py --p YOUR_INPUT_PATH --o YOUR_OUTPUT_FILE
+```shell
+sh scripts/setup-speedrun.sh
 ```
 
-_Note_: `ffmpeg` is required for process_videos.py. If this is not installed, download ffmpeg accordingly for your OS or install it locally using the `download-ffmpeg.sh` script.
+## Data Pre-processing
+
+***Note: all the following commands should be run from the project root directory***
+
+### Downloading
+
+Raw annotations should already be downloaded with this repository. If your annotations are missing, download the
+annotations by running
+
+```shell
+sh data/scripts/download/download_annotations.sh
+```
+
+If running on Shot2Story dataset, follow https://github.com/bytedance/Shot2Story/issues/5 to download the data
+and extract the videos into `data/raw/videos`.
+
+### Pre-processing
+
+First, process the videos by running `process_videos.py` in scripts/data/process, which will run `ffmpeg` to split
+the shot videos into different files. Then, convert the annotation data and scan for corrupted videos by
+running `convert_shot2story_to_llava.py`
+
+Set processes to a reasonable number depending on how many CPU cores you have available.
+
+```sh
+python scripts/data/process/process_videos.py --processes=<YOUR_NUM_PROCESSES>
+python scripts/data/process/convert_shot2story_to_llava.py
+```
+
+If you plan on running eval, make sure to run `convert_shot2story_to_llava.py` on the test set as well.
+
+_Note_: `ffmpeg` is required for process_videos.py. If this is not installed, download ffmpeg accordingly for your OS or
+install it locally using the `download-ffmpeg.sh` script.
 
 ## Finetuning
 
-Finetuning scripts are in `model/scripts/tiny_llava/finetune`. First, edit the data and image path in the scripts
+Finetuning scripts are in `scripts/run/finetune`. Run the finetuning script corresponding to which model you want to
+use.
 
-```
-DATA_PATH="YOUR_FULL_PATH_TO_ANNOTATIONS/test.json"
-IMAGE_PATH="YOUR_FULL_PATH_TO_VIDEOS"
-OUTPUT_DIR="OUTPUT_FOLDER_NAME"
-```
-
-Run the finetuning script corresponding to which model you want to use. For example, for the 1.5B model, run
 ```sh
-sh model/scripts/tiny_llava/finetune/finetune_1b5.sh
+sh scripts/run/finetune/finetune_1b5.sh  # finetune the 1.5B model
 ```
 
-Similarly, the 3.1B model is in `finetune_3b1.sh`.
+```sh
+sh scripts/run/finetune/finetune_3b1.sh  # finetune the 3.1B model
+```
 
 <!-- Model -->
+
 ## Model
 
-Something here about model
+Full model metrics, model zoo, and more details coming soon!
