@@ -5,7 +5,7 @@
     <img src="logo.jpeg" alt="Logo" width="140" height="120" >
   </a> -->
 
-  <h1 align="center">Shotluck Holmes</h1>
+  <h1 align="center">🔍 Shotluck Holmes</h1>
 
   <p align="center">
     Large Language Vision Models For Shot-Level Video Understanding (Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain)
