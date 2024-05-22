@@ -1,6 +1,5 @@
 # Copyright 2023 ByteDance and/or its affiliates.
 #
-# Modified Copyright 2024 Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -69,7 +68,6 @@ def split_video(video_info):
     # start = ast.literal_eval(row['duration'])[0]
     # end = ast.literal_eval(row['duration'])[1]
     # duration = (parse_large_timestamps(end) - parse_large_timestamps(start)).total_seconds()
-    # cmd = cmd_template.format(f"/home/hice1/apeng39/scratch/nlp/Shotluck-Holmes/data/videos/{video_name}", start, duration, f"/home/hice1/apeng39/scratch/nlp/Shotluck-Holmes/data/videos_extracted/{clip_id}.mp4")
 
     copy_cmd = f"cp data/raw/videos/{video_name} {os.path.join(OUTPUT_DIR, clip_id)}.mp4"
     os.system(copy_cmd)

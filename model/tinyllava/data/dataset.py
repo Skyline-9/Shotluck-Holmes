@@ -1,8 +1,7 @@
 import copy
 from dataclasses import dataclass
 import json
-from typing import Dict,  Sequence
-
+from typing import Dict, Sequence
 
 import transformers
 import torch
@@ -19,9 +18,10 @@ from decord import VideoReader
 from decord.ndarray import NDArray
 import numpy as np
 import os
-
+import random as rnd
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 class LazySupervisedDataset(Dataset):
     """Dataset for supervised fine-tuning."""
@@ -60,7 +60,7 @@ class LazySupervisedDataset(Dataset):
     def get_ground_truth(self, i):
         sources = self.list_data_dict[i]['conversations'][1]['value']
         return sources
-    
+
     def get_video_title(self, i):
         sources = self.list_data_dict[i]['video']
         return sources
@@ -70,7 +70,7 @@ class LazySupervisedDataset(Dataset):
         if isinstance(i, int):
             sources = [sources]
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
-        
+
         if 'image' in sources[0]:
             image_file = self.list_data_dict[i]['image']
             image_folder = self.data_args.image_folder
@@ -94,7 +94,7 @@ class LazySupervisedDataset(Dataset):
                 image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
             else:
                 image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
-            
+
             sources = preprocess_multimodal(
                 copy.deepcopy([e["conversations"] for e in sources]),
                 self.data_args)
@@ -102,8 +102,13 @@ class LazySupervisedDataset(Dataset):
             # TODO: load video into tensor
             video_file = self.list_data_dict[i]['video']
             video_folder = self.data_args.image_folder
-            
-            video = self.load_video(os.path.join(video_folder, video_file), height=384, width=384)
+            if 'shot_data' in self.list_data_dict[i]:
+                clips = self.list_data_dict[i]['shot_data']
+            else:
+                clips = None
+
+            # TODO: change if shot_data is none depending on if we are doing eval on full videos
+            video = self.load_video(os.path.join(video_folder, video_file), height=384, width=384, clips=None)
             video = video.permute(1, 0, 2, 3)
 
             sources = preprocess_multimodal(
@@ -130,9 +135,16 @@ class LazySupervisedDataset(Dataset):
             # image does not exist in the data, but the model is multimodal
             crop_size = self.data_args.image_processor.crop_size
             data_dict['image'] = torch.zeros(3, crop_size['height'], crop_size['width'])
+
         return data_dict
 
-    # n_frms=MAX_INT
+    # Copyright for load_video specifically
+    """
+     Copyright (c) 2022, salesforce.com, inc.
+     All rights reserved.
+     SPDX-License-Identifier: BSD-3-Clause
+     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+    """
     def load_video(self, video_path, n_frms=120, height=-1, width=-1, sampling="uniform", clips=None):
         # check video_path
         if type(video_path) is not str:
@@ -146,6 +158,7 @@ class LazySupervisedDataset(Dataset):
             frms = []
             fps = vr.get_avg_fps()
             for clip in clips:
+                # TOOD: Change this cause the way i formatted clips is different
                 strt_senconds, end_seconds, shot_strt_frms, shot_end_frms = clip
                 if shot_strt_frms == 0 and shot_end_frms == -1:
                     start = strt_senconds * fps + shot_strt_frms
@@ -167,13 +180,13 @@ class LazySupervisedDataset(Dataset):
                     half = n_frms // 2
                     another_half = n_frms - half
                     sampled_cnt = [half, another_half]
-                    random.shuffle(sampled_cnt)
+                    rnd.shuffle(sampled_cnt)
                     indices_h = sorted(rnd.sample(range(vlen // 2), sampled_cnt[0]))
                     indices_t = sorted(rnd.sample(range(vlen // 2, vlen), sampled_cnt[1]))
                     indices = indices_h + indices_t
                 else:
                     raise NotImplementedError
-                frms.append(vr.get_batch(indices).permute(3,0,1,2).float())
+                frms.append(vr.get_batch(indices).permute(3, 0, 1, 2).float())
                 # frms.append(vr.get_batch(indices).permute(0, 3, 1, 2).float())
         else:
             vlen = len(vr)
@@ -186,7 +199,7 @@ class LazySupervisedDataset(Dataset):
                 half = n_frms // 2
                 another_half = n_frms - half
                 sampled_cnt = [half, another_half]
-                random.shuffle(sampled_cnt)
+                rnd.shuffle(sampled_cnt)
                 indices_h = sorted(rnd.sample(range(vlen // 2), sampled_cnt[0]))
                 indices_t = sorted(rnd.sample(range(vlen // 2, vlen), sampled_cnt[1]))
                 indices = indices_h + indices_t
@@ -194,28 +207,30 @@ class LazySupervisedDataset(Dataset):
                 raise NotImplementedError
 
             # get_batch -> T, H, W, C
-            indices = [int(i) if int(i) < len(vr) else vlen-1 for i in indices]
+            indices = [int(i) if int(i) < len(vr) else vlen - 1 for i in indices]
             indices = sorted(indices)[:n_frms]
             try:
                 frms = vr.get_batch(indices)
                 if isinstance(frms, torch.Tensor):
-                    frms = frms.permute(3,0,1,2).float()
+                    frms = frms.permute(3, 0, 1, 2).float()
                     # frms = frms.permute(0, 3, 1, 2).float()
                 elif isinstance(frms, NDArray):
-                    frms = torch.from_numpy(frms.asnumpy()).permute(3,0,1,2).float()
+                    frms = torch.from_numpy(frms.asnumpy()).permute(3, 0, 1, 2).float()
                     # frms = torch.from_numpy(frms.asnumpy()).permute(0, 3, 1, 2).float()
             except Exception as e:
+                print("Exception occured in data loading!")
                 print(indices, len(vr), n_frms)
                 print(video_path)
-                indices = [int(i) if int(i) < len(vr) else rnd.sample(range(vlen),1)[0] for i in indices]
+                indices = [int(i) if int(i) < len(vr) else rnd.sample(range(vlen), 1)[0] for i in indices]
                 print(indices)
                 print(e)
 
             # shape is [frames, channels, height width]
-            assert len(frms[0])==n_frms, f"{frms.shape}, {len(frms)}, {indices}, {vlen}, {n_frms}"
+            assert len(frms[0]) == n_frms, f"{frms.shape}, {len(frms)}, {indices}, {vlen}, {n_frms}"
             # frms = torch.from_numpy(vr.get_batch(indices).asnumpy()).permute(3, 0, 1, 2).float()  # (C, T, H, W)
 
         return frms
+
 
 @dataclass
 class DataCollatorForSupervisedDataset(object):
