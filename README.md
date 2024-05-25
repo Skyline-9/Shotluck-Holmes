@@ -9,12 +9,10 @@
 
   <p align="center">
     Large Language Vision Models For Shot-Level Video Understanding (Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain)
-    <br />
-    <br />
-<!--     <a href="https://arxiv.org/pdf/2005.09007.pdf"><strong>Read the paper »</strong></a> -->
+    <br /><br />
+    <a href="https://github.com/Skyline-9/Shotluck-Holmes"><strong>Paper coming soon... »</strong></a>
+    <br /><br />
     <img src="https://img.shields.io/github/license/Skyline-9/Shotluck-Holmes?style=for-the-badge" alt="GitHub License">
-    <br />
-    <br />
   </p>
 </p>
 
@@ -26,9 +24,6 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#introduction">Introduction</a></li>
-    <li>
-      <a href="#model">Model</a>
-    </li>
     <li><a href="#-requirements-and-installation">🔧 Requirements and Installation</a></li>
     <li>
         <a href="#data-pre-processing">Data Pre-processing</a>
@@ -38,6 +33,8 @@
         </ul>
     </li>
     <li><a href="#finetuning">Finetuning</a></li>
+    <li><a href="#model">Model</a></li>
+    <li><a href="#results">Results</a></li>
   </ol>
 </details>
 
@@ -45,13 +42,7 @@
 
 ## Introduction
 
-Video is a rapidly growing format rich in information, yet it remains a challenging task for computers to understand. A
-video often consists of a storyline comprised of multiple short shots, and comprehension of the video requires not only
-understanding the shot-by-shot visual-audio information but also associating the ideas between each shot for a larger
-big-picture idea. Despite significant progress, current works neglect videos' more granular shot-by-shot semantic
-information. In this project, we propose an efficient large language vision model (LLVM) to boost video summarization
-and captioning. Specifically, we reproduce near-SOTA results on the Shot2Story video captioning task with a much smaller
-model.
+  Video is an increasingly prominent and information-dense medium, yet it poses substantial challenges for language models. A typical video consists of a sequence of shorter segments, or shots, that collectively form a coherent narrative. Each shot is analogous to a word in a sentence where multiple data streams of information (such as visual and auditory data) must be processed simultaneously. Comprehension of the entire video requires not only understanding the visual-audio information of each shot but also requires that the model links the ideas between each shot to generate a larger, all-encompassing story. Despite significant progress in the field, current works often overlook videos’ more granular shot-by-shot semantic information. In this project, we propose a family of efficient large language vision models (LLVMs) to boost video summarization and captioning called Shotluck Holmes. By leveraging better pretraining and data collection strategies, we extend the abilities of existing small LLVMs from being able to understand a picture to being able to understand a sequence of frames. Specifically, we show that Shotluck Holmes achieves better performance than state-of-the-art results on the Shot2Story video captioning and summary task with significantly smaller and more computationally efficient models.
 
 <!-- REQUIREMENTS AND INSTALLATION -->
 
@@ -136,3 +127,22 @@ sh scripts/run/finetune/finetune_3b1.sh  # finetune the 3.1B model
 ## Model
 
 Full model metrics, model zoo, and more details coming soon!
+
+## Results
+
+*Table 1: Performance of best models on single-shot video captioning*
+
+| Model                     | BLEU     | METEOR   | ROUGE   | CIDER     |
+|---------------------------|----------|----------|---------|-----------|
+| Shot2Story (7B+)          | **10.7** | 16.2     | 29.6    | 37.4      |
+| Shotluck-Holmes (3.1B)    | 8.7      | **25.7** | 36.2    | 63.2      |
+| Shotluck-Holmes (1.5B)    | 9.3      | 25.3     | **36.3**| **68.9**  |
+
+*Table 2: Performance of best models on multi-shot video summarization*
+
+| Model                     | BLEU  | METEOR | ROUGE | CIDER  |
+|---------------------------|-------|--------|-------|--------|
+| Shot2Story (7B+)          | **11.7** | 19.7   | 26.8  | 8.6    |
+| Shotluck-Holmes (3.1B)    | 7.67  | **23.2** | **43**  | **152.3** |
+| Shotluck-Holmes (1.5B)    | 6.48  | 21.3   | 40.2  | 144.3  |
+
