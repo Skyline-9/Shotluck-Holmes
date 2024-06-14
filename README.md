@@ -10,9 +10,15 @@
   <p align="center">
     Large Language Vision Models For Shot-Level Video Understanding (Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain)
     <br /><br />
-    <a href="https://github.com/Skyline-9/Shotluck-Holmes"><strong>Paper coming soon... »</strong></a>
+    <a href="https://arxiv.org/abs/2405.20648"><strong>Read the Preprint Here »</strong></a>
     <br /><br />
     <img src="https://img.shields.io/github/license/Skyline-9/Shotluck-Holmes?style=for-the-badge" alt="GitHub License">
+    <a href="https://paperswithcode.com/sota/video-captioning-on-shot2story20k?p=shotluck-holmes-a-family-of-efficient-small">
+      <img src="https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/shotluck-holmes-a-family-of-efficient-small/video-captioning-on-shot2story20k&style=for-the-badge" alt="Shotluck Holmes Badge">
+    </a>
+    <a href="https://paperswithcode.com/sota/video-summarization-on-shot2story20k?p=shotluck-holmes-a-family-of-efficient-small">
+      <img src="https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/shotluck-holmes-a-family-of-efficient-small/video-summarization-on-shot2story20k&style=for-the-badge" alt="Shotluck Holmes Badge">
+    </a>
   </p>
 </p>
 
