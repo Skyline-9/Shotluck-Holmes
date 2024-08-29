@@ -132,7 +132,9 @@ sh scripts/run/finetune/finetune_3b1.sh  # finetune the 3.1B model
 
 ## Model
 
-Full model metrics, model zoo, and more details coming soon!
+Hugging Face Models
+- [Shotluck Holmes 1.5B Model](https://huggingface.co/RichardLuo/Shotluck-Holmes-1.5)
+- [Shotluck Holmes 3.1B Model](https://huggingface.co/RichardLuo/Shotluck-Holmes-3.1)
 
 ## Results
 
