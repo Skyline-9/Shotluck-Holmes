@@ -10,7 +10,7 @@
   <p align="center">
     Large Language Vision Models For Shot-Level Video Understanding (Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain)
     <br /><br />
-    <a href="https://arxiv.org/abs/2405.20648"><strong>Read the Preprint Here »</strong></a>
+    <a href="[https://arxiv.org/abs/2405.20648](https://doi.org/10.1145/3689091.3690086)"><strong>Read the Paper Here »</strong></a>
     <br /><br />
     <img src="https://img.shields.io/github/license/Skyline-9/Shotluck-Holmes?style=for-the-badge" alt="GitHub License">
     <a href="https://paperswithcode.com/sota/video-captioning-on-shot2story20k?p=shotluck-holmes-a-family-of-efficient-small">
