@@ -9,6 +9,8 @@
 
   <p align="center">
     Large Language Vision Models For Shot-Level Video Understanding (Richard Luo, Austin Peng, Adithya Vasudev, Rishabh Jain)
+    <br />
+    🎉 Accepted into ACM MMGR '24!
     <br /><br />
     <a href="https://arxiv.org/abs/2405.20648"><strong>Read the Paper Here »</strong></a>
     <br /><br />
